@@ -7,6 +7,11 @@
     - [Pós-instalação](#pós-instalação)
       - [Atualizando os pacotes](#atualizando-os-pacotes)
       - [Criando usuários](#criando-usuários)
+  - [SSH](#ssh)
+    - [Instalando](#instalando)
+    - [Uso](#uso)
+    - [Relação de confiança SSH](#relação-de-confiança-ssh)
+    - [Desabilitando o uso de senhas](#desabilitando-o-uso-de-senhas)
 
 </br>
 
@@ -62,3 +67,33 @@
 - use `adduser username` para criar usuário 'username'
 - use `passwd username` para definer a senha do usuário 'username'
 - para atribuir privilégios de root para um usuário, execute `visudo` e no arquivo que será aberto por esse comando, adicione `username ALL=(ALL) ALL`
+
+## SSH
+
+### Instalando
+
+- execute `dnf list installed | grep openssh-server`, pule essa seção caso o servidor SSH já esteja instalado
+- `dnf install openssh-server`
+- `systemctl start sshd`
+- `systemctl enable sshd`
+- `systemctl disable firewalld`
+
+### Uso
+
+- use `ip a` para descobrir o IP da máquina que você deseja acessar usando SSH
+- use `ssh root@ip` para acessar a máquina via SSH
+
+### Relação de confiança SSH
+
+- refere-se à habilidade de uma máquina acessar outra máquina via **SSH sem a utilização de senha**
+- antes de começar, você já deve ter acessado as máquinas via SSH em ambas as direções para que a conexão entre elas tenha sido estabelecida
+- digamos que você queira acessar a máquina B através da máquina A
+- na máquina A gere a key `ssh-keygen -t rsa -f ~/.ssh/id_rsa` e a copie para a máquina B `scp .ssh/id_rsa.pub username@ip:/home/username/.ssh/authorized_keys`
+- agora você pode acessar a máquina B através da máquina A usando `ssh username@ip` sem precisar digitar a senha
+
+### Desabilitando o uso de senhas
+
+- a relação de confiança é uma forma mais segura de autenticação do que a utilização de senhas
+- você pode desabilitar a autentificação via senha e dessa forma apenas máquinas que estabeleceram relação de confiança poderão se comunicar via SSH
+- execute `sudo vi /etc/ssh/sshd_config` e substituía a linha `#PasswordAutentication yes` por `PasswordAutentication no`
+- após salvar e fechar o arquivo, reinicie o servidor SSH usando `sudo systemctl restart sshd`
